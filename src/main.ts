@@ -1,4 +1,5 @@
 import { resources } from "./Resources";
+import { Sprites } from "./Sprites";
 import "./style.css";
 
 const canvas = document.querySelector("#game-canvas") as HTMLCanvasElement;
@@ -16,6 +17,13 @@ const draw = () => {
     ctx?.drawImage(ground.image, 0, 0);
   }
 };
+
+const hero = new Sprites({
+  resource: resources.images.hero.image,
+  hFrames: 3,
+  vFrames: 8,
+  frame: 1,
+});
 
 setInterval(() => {
   draw();
