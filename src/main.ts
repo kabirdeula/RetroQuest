@@ -1,7 +1,8 @@
 import { resources } from "./core/Resources";
 import { Sprite } from "./entities/Sprites";
-import "./style.css";
+import "./styles/style.css";
 import { Vector2 } from "./core/Vector2";
+import { GameLoop } from "./systems/GameLoop";
 
 const canvas = document.querySelector("#game-canvas") as HTMLCanvasElement;
 
@@ -31,6 +32,10 @@ const shadowSprite = new Sprite({
 
 const heroPosition = new Vector2(16 * 14, 16 * 5);
 
+const update = () => {
+  heroSprite.frame += 1;
+};
+
 const draw = () => {
   const heroOffset = new Vector2(-8, -21);
   const heroPositionX = heroPosition.x + heroOffset.x;
@@ -42,7 +47,5 @@ const draw = () => {
   heroSprite.drawImage(ctx, heroPositionX, heroPositionY);
 };
 
-setInterval(() => {
-  heroSprite.frame += 1;
-  draw();
-}, 300);
+const gameLoop = new GameLoop(update, draw);
+gameLoop.start();
