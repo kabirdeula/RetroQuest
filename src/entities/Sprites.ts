@@ -1,5 +1,5 @@
-import type { ImageResource } from "./ImageResource";
-import { Vector2 } from "./Vector2";
+import type { ImageResource } from "../core/ImageResource";
+import { Vector2 } from "../core/Vector2";
 
 interface SpriteParams {
   resource: ImageResource;

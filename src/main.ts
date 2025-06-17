@@ -1,7 +1,7 @@
-import { resources } from "./Resources";
-import { Sprite } from "./Sprites";
+import { resources } from "./core/Resources";
+import { Sprite } from "./entities/Sprites";
 import "./style.css";
-import { Vector2 } from "./Vector2";
+import { Vector2 } from "./core/Vector2";
 
 const canvas = document.querySelector("#game-canvas") as HTMLCanvasElement;
 

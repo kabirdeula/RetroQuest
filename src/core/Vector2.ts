@@ -7,19 +7,19 @@ export class Vector2 {
     this.y = y;
   }
 
-  set(x: number, y: number): Vector2 {
+  set(x: number, y: number): this {
     this.x = x;
     this.y = y;
     return this;
   }
 
-  add(v: Vector2): Vector2 {
+  add(v: Vector2): this {
     this.x += v.x;
     this.y += v.y;
     return this;
   }
 
-  subtract(v: Vector2): Vector2 {
+  subtract(v: Vector2): this {
     this.x -= v.x;
     this.y -= v.y;
     return this;
