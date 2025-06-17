@@ -1,7 +1,4 @@
-interface ImageResource {
-  image: HTMLImageElement;
-  isLoaded: boolean;
-}
+import type { ImageResource } from "./ImageResource";
 
 class Resources {
   toLoad: Record<string, string>;

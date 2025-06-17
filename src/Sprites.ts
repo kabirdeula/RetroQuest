@@ -1,17 +1,18 @@
+import type { ImageResource } from "./ImageResource";
 import { Vector2 } from "./Vector2";
 
 interface SpriteParams {
-  resource: HTMLImageElement;
+  resource: ImageResource;
   frameSize?: Vector2;
-  hFrames: number;
-  vFrames: number;
+  hFrames?: number;
+  vFrames?: number;
   frame?: number;
   scale?: Vector2;
   position?: Vector2;
 }
 
-export class Sprites {
-  resource: HTMLImageElement;
+export class Sprite {
+  resource: ImageResource;
   frameSize: Vector2;
   hFrames: number;
   vFrames: number;
@@ -55,5 +56,33 @@ export class Sprites {
     }
   }
 
-  // drawImage(ctx, x, y) {}
+  drawImage(ctx: CanvasRenderingContext2D | null, x: number, y: number) {
+    if (!this.resource.isLoaded) {
+      return;
+    }
+
+    let frameCoordinateX = 0;
+    let frameCoordinateY = 0;
+    const frame = this.frameMap.get(this.frame);
+
+    if (frame) {
+      frameCoordinateX = frame.x;
+      frameCoordinateY = frame.y;
+    }
+
+    const frameSizeX = this.frameSize.x;
+    const frameSizeY = this.frameSize.y;
+
+    ctx?.drawImage(
+      this.resource.image,
+      frameCoordinateX,
+      frameCoordinateY,
+      frameSizeX,
+      frameSizeY,
+      x,
+      y,
+      frameSizeX * this.scale.x,
+      frameSizeY * this.scale.y
+    );
+  }
 }
