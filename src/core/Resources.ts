@@ -1,9 +1,6 @@
-interface ImageResource {
-  image: HTMLImageElement;
-  isLoaded: boolean;
-}
+import { ImageResource } from "./ImageResource";
 
-class Resources {
+export class Resources {
   toLoad: Record<string, string>;
   images: Record<string, ImageResource>;
 
@@ -17,14 +14,17 @@ class Resources {
 
     this.images = {};
 
-    Object.keys(this.toLoad).forEach((key) => {
+    for (const key in this.toLoad) {
       const img = new Image();
       img.src = this.toLoad[key];
-      this.images[key] = { image: img, isLoaded: false };
+
+      const resource = new ImageResource({ image: img, isLoaded: false });
+      this.images[key] = resource;
+
       img.onload = () => {
-        this.images[key].isLoaded = true;
+        resource.isLoaded = true;
       };
-    });
+    }
   }
 }
 
