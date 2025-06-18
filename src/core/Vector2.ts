@@ -24,4 +24,8 @@ export class Vector2 {
     this.y -= v.y;
     return this;
   }
+
+  clone(): Vector2 {
+    return new Vector2(this.x, this.y);
+  }
 }

@@ -4,6 +4,8 @@ import "./styles/style.css";
 import { Vector2 } from "./core/Vector2";
 import { GameLoop } from "./systems/GameLoop";
 import { DOWN, Input, LEFT, RIGHT, UP } from "./systems/Input";
+import { gridCells } from "./helpers/grid";
+import { moveTowards } from "./helpers/move_towards";
 
 const canvas = document.querySelector("#game-canvas") as HTMLCanvasElement;
 
@@ -24,39 +26,63 @@ const heroSprite = new Sprite({
   hFrames: 3,
   vFrames: 8,
   frame: 1,
+  position: new Vector2(gridCells(6), gridCells(5)),
 });
+
+const heroDestinationPosition = heroSprite.position.clone();
 
 const shadowSprite = new Sprite({
   resource: resources.images.shadow,
   frameSize: new Vector2(32, 32),
 });
 
-const heroPosition = new Vector2(16 * 14, 16 * 5);
 const input = new Input();
 
 const update = () => {
+  const distance = moveTowards(heroSprite, heroDestinationPosition, 1);
+  const hasArrived = distance <= 1;
+  if (hasArrived) {
+    tryMove();
+  }
+
+  return;
+};
+
+const tryMove = () => {
+  if (!input.direction) {
+    return;
+  }
+
+  let nextX = heroDestinationPosition.x;
+  let nextY = heroDestinationPosition.y;
+  const gridSize = 16;
+
   if (input.direction === DOWN) {
-    heroPosition.y += 1;
-    heroSprite.frame = 0; 
+    nextY += gridSize;
+    heroSprite.frame = 0;
   }
   if (input.direction === UP) {
-    heroPosition.y -= 1;
+    nextY -= gridSize;
     heroSprite.frame = 6;
   }
   if (input.direction === RIGHT) {
-    heroPosition.x += 1;
+    nextX += gridSize;
     heroSprite.frame = 3;
   }
   if (input.direction === LEFT) {
-    heroPosition.x -= 1;
-    heroSprite.frame = 9; 
+    nextX -= gridSize;
+    heroSprite.frame = 9;
   }
+
+  // TODO - check if that space is free
+  heroDestinationPosition.x = nextX;
+  heroDestinationPosition.y = nextY;
 };
 
 const draw = () => {
   const heroOffset = new Vector2(-8, -21);
-  const heroPositionX = heroPosition.x + heroOffset.x;
-  const heroPositionY = heroPosition.y + heroOffset.y;
+  const heroPositionX = heroSprite.position.x + heroOffset.x;
+  const heroPositionY = heroSprite.position.y + heroOffset.y;
 
   skySprite.drawImage(ctx, 0, 0);
   groundSprite.drawImage(ctx, 0, 0);
