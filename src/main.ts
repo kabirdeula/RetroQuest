@@ -6,7 +6,7 @@ import { GameLoop } from "./systems/GameLoop";
 import { DOWN, Input, LEFT, RIGHT, UP } from "./systems/Input";
 import { gridCells, isSpaceFree } from "./helpers/grid";
 import { moveTowards } from "./helpers/move_towards";
-import { walls } from "./levels/Level1";
+import { walls } from "./levels/level1";
 
 const canvas = document.querySelector("#game-canvas") as HTMLCanvasElement;
 
