@@ -1,5 +1,6 @@
 import type { ImageResource } from "../core/ImageResource";
 import { Vector2 } from "../core/Vector2";
+import { Animations } from "../systems/Animations";
 
 interface SpriteParams {
   resource: ImageResource;
@@ -9,6 +10,7 @@ interface SpriteParams {
   frame?: number;
   scale?: Vector2;
   position?: Vector2;
+  animations?: Animations;
 }
 
 export class Sprite {
@@ -20,15 +22,17 @@ export class Sprite {
   scale: Vector2;
   position: Vector2;
   frameMap: Map<any, any>;
+  animations: Animations;
 
   constructor({
     resource,
     frameSize,
     hFrames,
     vFrames,
-    frame = 0,
+    frame,
     scale = new Vector2(1, 1),
     position = new Vector2(0, 0),
+    animations,
   }: SpriteParams) {
     this.resource = resource;
     this.frameSize = frameSize ?? new Vector2(16, 16);
@@ -38,6 +42,7 @@ export class Sprite {
     this.frameMap = new Map();
     this.scale = scale ?? 1;
     this.position = position ?? new Vector2(0, 0);
+    this.animations = animations ?? new Animations();
     this.buildFrameMap();
   }
 
@@ -54,6 +59,15 @@ export class Sprite {
         frameCount++;
       }
     }
+  }
+
+  step(delta: number) {
+    if (!this.animations) {
+      return;
+    }
+
+    this.animations.step(delta);
+    this.frame = this.animations.frame;
   }
 
   drawImage(ctx: CanvasRenderingContext2D | null, x: number, y: number) {
