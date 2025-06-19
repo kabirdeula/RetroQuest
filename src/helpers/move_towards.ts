@@ -1,8 +1,7 @@
 import type { Vector2 } from "../core/Vector2";
-import type { Sprite } from "../entities/Sprites";
 
 export function moveTowards(
-  person: Sprite,
+  person: { position: Vector2 },
   destinationPosition: Vector2,
   speed: number
 ) {
