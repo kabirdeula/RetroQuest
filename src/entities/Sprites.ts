@@ -1,6 +1,7 @@
 import type { ImageResource } from "../core/ImageResource";
 import { Vector2 } from "../core/Vector2";
 import { Animations } from "../systems/Animations";
+import { GameObject } from "../systems/GameObject";
 
 interface SpriteParams {
   resource: ImageResource;
@@ -13,7 +14,7 @@ interface SpriteParams {
   animations?: Animations;
 }
 
-export class Sprite {
+export class Sprite extends GameObject {
   resource: ImageResource;
   frameSize: Vector2;
   hFrames: number;
@@ -34,6 +35,7 @@ export class Sprite {
     position = new Vector2(0, 0),
     animations,
   }: SpriteParams) {
+    super({ position });
     this.resource = resource;
     this.frameSize = frameSize ?? new Vector2(16, 16);
     this.hFrames = hFrames ?? 1;
