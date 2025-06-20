@@ -1,12 +1,12 @@
-import { resources } from "../../core/Resources";
+import { resources } from "../../core/Resources/Resources";
 import { Vector2 } from "../../core/Vector2";
-import { isSpaceFree } from "../../helpers/grid";
-import { moveTowards } from "../../helpers/move_towards";
-import { walls } from "../../levels/level1";
-import { Animations } from "../../systems/Animations";
-import { FrameIndexPattern } from "../../systems/FrameIndexPattern";
+import { isSpaceFree } from "../../utils/grid";
+import { moveTowards } from "../../utils/moveTowards";
+import { walls } from "../../levels/Level1";
+import { AnimationSystem } from "../../systems/animation/AnimationSystem";
+import { AnimationFramePattern } from "../../systems/animation/AnimationFramePattern";
 import { GameObject } from "../../systems/GameObject";
-import { DOWN, LEFT, RIGHT, UP } from "../../systems/Input";
+import { DOWN, LEFT, RIGHT, UP } from "../../systems/InputSystem";
 import { Sprite } from "../Sprites";
 import {
   STAND_DOWN,
@@ -17,16 +17,20 @@ import {
   WALK_LEFT,
   WALK_RIGHT,
   WALK_UP,
-} from "./heroAnimation";
+} from "./HeroAnimation";
 
+/**
+ * Hero represents the player character with the movement and animation
+ */
 export class Hero extends GameObject {
-  body: Sprite;
-  facingDirection: string;
-  destinationPosition: Vector2;
+  private body: Sprite;
+  private facingDirection: string = DOWN;
+  private destinationPosition: Vector2;
 
   constructor(x: number, y: number) {
     super({ position: new Vector2(x, y) });
 
+    // Add shadow sprite
     const shadow = new Sprite({
       resource: resources.images.shadow,
       frameSize: new Vector2(32, 32),
@@ -34,36 +38,35 @@ export class Hero extends GameObject {
     });
     this.addChild(shadow);
 
+    // Add main hero body sprite
     this.body = new Sprite({
       resource: resources.images.hero,
       frameSize: new Vector2(32, 32),
       hFrames: 3,
       vFrames: 8,
       position: new Vector2(-8, -21),
-      animations: new Animations({
-        walkDown: new FrameIndexPattern(WALK_DOWN),
-        walkUp: new FrameIndexPattern(WALK_UP),
-        walkLeft: new FrameIndexPattern(WALK_LEFT),
-        walkRight: new FrameIndexPattern(WALK_RIGHT),
-        standDown: new FrameIndexPattern(STAND_DOWN),
-        standUp: new FrameIndexPattern(STAND_UP),
-        standLeft: new FrameIndexPattern(STAND_LEFT),
-        standRight: new FrameIndexPattern(STAND_RIGHT),
+      animations: new AnimationSystem({
+        walkDown: new AnimationFramePattern(WALK_DOWN),
+        walkUp: new AnimationFramePattern(WALK_UP),
+        walkLeft: new AnimationFramePattern(WALK_LEFT),
+        walkRight: new AnimationFramePattern(WALK_RIGHT),
+        standDown: new AnimationFramePattern(STAND_DOWN),
+        standUp: new AnimationFramePattern(STAND_UP),
+        standLeft: new AnimationFramePattern(STAND_LEFT),
+        standRight: new AnimationFramePattern(STAND_RIGHT),
       }),
     });
 
     this.addChild(this.body);
 
-    this.facingDirection = DOWN;
     this.destinationPosition = this.position.clone();
-
-    console.log("Hero created at position:", this.position);
-    console.log("Hero Destination Position:", this.destinationPosition);
   }
 
+  /**
+   * Called every frame to update position and animation.
+   */
   step(delta: number, root?: { input?: { direction?: string } }) {
     const distance = moveTowards(this, this.destinationPosition, 1);
-
     const hasArrived = distance <= 1;
 
     if (hasArrived && root?.input) {
@@ -73,6 +76,9 @@ export class Hero extends GameObject {
     this.body.step(delta);
   }
 
+  /**
+   * Handles movement input and updates destination/animation.
+   */
   private tryMove(input: { direction?: string }) {
     if (!input.direction) {
       this.playStandAnimation();
@@ -83,29 +89,36 @@ export class Hero extends GameObject {
     let nextX = this.destinationPosition.x;
     let nextY = this.destinationPosition.y;
 
-    if (input.direction === DOWN) {
-      nextY += gridSize;
-      this.body.animations?.play("walkDown");
-    } else if (input.direction === UP) {
-      nextY -= gridSize;
-      this.body.animations?.play("walkUp");
-    } else if (input.direction === LEFT) {
-      nextX -= gridSize;
-      this.body.animations?.play("walkLeft");
-    } else if (input.direction === RIGHT) {
-      nextX += gridSize;
-      this.body.animations?.play("walkRight");
+    switch (input.direction) {
+      case DOWN:
+        nextY += gridSize;
+        this.body.animations?.play("walkDown");
+        break;
+      case UP:
+        nextY -= gridSize;
+        this.body.animations?.play("walkUp");
+        break;
+      case LEFT:
+        nextX -= gridSize;
+        this.body.animations?.play("walkLeft");
+        break;
+      case RIGHT:
+        nextX += gridSize;
+        this.body.animations?.play("walkRight");
+        break;
     }
 
     this.facingDirection = input.direction ?? this.facingDirection;
 
     if (isSpaceFree(walls, nextX, nextY)) {
       console.log("Moving to:", nextX, nextY);
-      this.destinationPosition.x = nextX;
-      this.destinationPosition.y = nextY;
+      this.destinationPosition.set(nextX, nextY);
     }
   }
 
+  /**
+   * Plays idle animation based on last facing direction.
+   */
   private playStandAnimation() {
     switch (this.facingDirection) {
       case LEFT:
