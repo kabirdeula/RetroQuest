@@ -8,6 +8,7 @@ import { GameObject } from "./systems/GameObject";
 import { Hero } from "./entities/hero/Hero";
 
 import "./styles/style.css";
+import { events } from "./core/Event";
 
 /**
  * Initialize canvas and rendering context.
@@ -50,6 +51,10 @@ mainScene.addChild(hero);
  * Attach input system to the main scene.
  */
 mainScene.input = new InputSystem();
+
+events.on("HERO_POSITION", mainScene, (heroPosition) => {
+  console.log("HERO MOVED", heroPosition);
+});
 
 /**
  * Update callback for game loop.

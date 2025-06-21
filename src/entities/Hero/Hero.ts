@@ -18,6 +18,7 @@ import {
   WALK_RIGHT,
   WALK_UP,
 } from "./HeroAnimation";
+import { events } from "../../core/Event";
 
 /**
  * Hero represents the player character with the movement and animation
@@ -26,6 +27,8 @@ export class Hero extends GameObject {
   private body: Sprite;
   private facingDirection: string = DOWN;
   private destinationPosition: Vector2;
+  private lastX: number = 0;
+  private lastY: number = 0;
 
   constructor(x: number, y: number) {
     super({ position: new Vector2(x, y) });
@@ -74,6 +77,16 @@ export class Hero extends GameObject {
     }
 
     this.body.step(delta);
+
+    this.tryEmit();
+  }
+
+  private tryEmit() {
+    if (this.lastX === this.position.x && this.lastY === this.position.y)
+      return;
+    this.lastX = this.position.x;
+    this.lastY = this.position.y;
+    events.emit("HERO_POSITION", this.position);
   }
 
   /**
