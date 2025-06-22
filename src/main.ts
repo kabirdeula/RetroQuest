@@ -8,7 +8,7 @@ import { GameObject } from "./systems/GameObject";
 import { Hero } from "./entities/hero/Hero";
 
 import "./styles/style.css";
-import { events } from "./core/Event";
+import { Camera } from "./systems/Camera";
 
 /**
  * Initialize canvas and rendering context.
@@ -17,6 +17,16 @@ const canvas = document.querySelector(
   "#game-canvas"
 ) as HTMLCanvasElement | null;
 const ctx = canvas?.getContext("2d");
+
+if (!canvas || !ctx) {
+  throw new Error("Canvas element or rendering context not found.");
+}
+
+/**
+ * Constants for canvas dimensions.
+ */
+const CANVAS_WIDTH = 320;
+const CANVAS_HEIGHT = 180;
 
 /**
  * Create the main scene graph root.
@@ -28,16 +38,16 @@ const mainScene = new GameObject({ position: new Vector2(0, 0) });
  */
 const skySprite = new Sprite({
   resource: resources.images.sky,
-  frameSize: new Vector2(320, 180),
+  frameSize: new Vector2(CANVAS_WIDTH, CANVAS_HEIGHT),
 });
-mainScene.addChild(skySprite);
+// mainScene.addChild(skySprite);
 
 /**
  * Add ground sprite layer.
  */
 const groundSprite = new Sprite({
   resource: resources.images.ground,
-  frameSize: new Vector2(320, 180),
+  frameSize: new Vector2(CANVAS_WIDTH, CANVAS_HEIGHT),
 });
 mainScene.addChild(groundSprite);
 
@@ -48,13 +58,15 @@ const hero = new Hero(gridCells(6), gridCells(5));
 mainScene.addChild(hero);
 
 /**
+ * Create and add camera to the scene (follows hero's position).
+ */
+const camera = new Camera();
+mainScene.addChild(camera);
+
+/**
  * Attach input system to the main scene.
  */
 mainScene.input = new InputSystem();
-
-events.on("HERO_POSITION", mainScene, (heroPosition) => {
-  console.log("HERO MOVED", heroPosition);
-});
 
 /**
  * Update callback for game loop.
@@ -68,7 +80,20 @@ const update = (delta: number) => {
  * Draw callback for game loop.
  */
 const draw = () => {
+  // Clear entire canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw static sky background
+  skySprite.drawImage(ctx ?? null, 0, 0);
+
+  // Apply camera transform for scene
+  ctx.save();
+  ctx.translate(camera.position.x, camera.position.y);
+
+  // Draw scene graph
   mainScene.draw(ctx ?? null, 0, 0);
+
+  ctx.restore();
 };
 
 /**
