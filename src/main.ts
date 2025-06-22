@@ -10,6 +10,7 @@ import { Hero } from "./entities/hero/Hero";
 import "./styles/style.css";
 import { Camera } from "./systems/Camera";
 import { Rod } from "./entities/rod/Rod";
+import { Inventory } from "./entities/inventory/Inventory";
 
 /**
  * Initialize canvas and rendering context.
@@ -67,6 +68,8 @@ mainScene.addChild(camera);
 const rod = new Rod(gridCells(7), gridCells(6));
 mainScene.addChild(rod);
 
+const inventory = new Inventory();
+
 /**
  * Attach input system to the main scene.
  */
@@ -98,6 +101,8 @@ const draw = () => {
   mainScene.draw(ctx ?? null, 0, 0);
 
   ctx.restore();
+
+  inventory.draw(ctx, 0, 0);
 };
 
 /**
