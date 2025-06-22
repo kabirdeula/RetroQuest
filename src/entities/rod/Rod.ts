@@ -25,7 +25,9 @@ export class Rod extends GameObject {
       position: new Vector2(0, -5),
     });
     this.addChild(this.rodSprite);
+  }
 
+  ready() {
     // Subscribe to hero position updates to check for collision.
     events.on("HERO_POSITION", this, (heroPosition: Vector2) => {
       this.checkCollisionWithHero(heroPosition);
