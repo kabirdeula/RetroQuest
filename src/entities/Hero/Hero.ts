@@ -9,6 +9,7 @@ import { GameObject } from "../../systems/GameObject";
 import { DOWN, LEFT, RIGHT, UP } from "../../systems/InputSystem";
 import { Sprite } from "../Sprites";
 import {
+  PICK_UP_DOWN,
   STAND_DOWN,
   STAND_LEFT,
   STAND_RIGHT,
@@ -19,6 +20,7 @@ import {
   WALK_UP,
 } from "./HeroAnimation";
 import { events } from "../../core/Event";
+import type { ImageResource } from "../../core/Resources/ImageResource";
 
 /**
  * Hero represents the player character with the movement and animation
@@ -29,7 +31,15 @@ export class Hero extends GameObject {
   private destinationPosition: Vector2;
   private lastX: number = 0;
   private lastY: number = 0;
+  private itemPickupTime: number = 0;
+  private itemPickupObject: GameObject | null = null;
 
+  /**
+   * Create a hero at the given grid position.
+   *
+   * @param x - Initial X position (in pixels).
+   * @param y - Initial Y position (in pixels).
+   */
   constructor(x: number, y: number) {
     super({ position: new Vector2(x, y) });
 
@@ -57,18 +67,32 @@ export class Hero extends GameObject {
         standUp: new AnimationFramePattern(STAND_UP),
         standLeft: new AnimationFramePattern(STAND_LEFT),
         standRight: new AnimationFramePattern(STAND_RIGHT),
+        pickUpDown: new AnimationFramePattern(PICK_UP_DOWN),
       }),
     });
 
     this.addChild(this.body);
 
     this.destinationPosition = this.position.clone();
+
+    // Listen for item pickup events
+    events.on("HERO_PICKS_UP_ITEM", this, (data) => {
+      this.onPickUpItem(data);
+    });
   }
 
   /**
    * Called every frame to update position and animation.
+   *
+   * @param delta - Time elapsed since last frame (ms)
+   * @param root - The game root object containing input (optional)
    */
   step(delta: number, root?: { input?: { direction?: string } }) {
+    if (this.itemPickupTime > 0) {
+      this.updateItemPickup(delta);
+      return;
+    }
+
     const distance = moveTowards(this, this.destinationPosition, 1);
     const hasArrived = distance <= 1;
 
@@ -77,11 +101,13 @@ export class Hero extends GameObject {
     }
 
     this.body.step(delta);
-
-    this.tryEmit();
+    this.emitPositionIfChanged();
   }
 
-  private tryEmit() {
+  /**
+   * Emits HERO_POSITION event if the hero's position has changed.
+   */
+  private emitPositionIfChanged() {
     if (this.lastX === this.position.x && this.lastY === this.position.y)
       return;
     this.lastX = this.position.x;
@@ -91,6 +117,7 @@ export class Hero extends GameObject {
 
   /**
    * Handles movement input and updates destination/animation.
+   * @param input - Input object with direction.
    */
   private tryMove(input: { direction?: string }) {
     if (!input.direction) {
@@ -124,7 +151,6 @@ export class Hero extends GameObject {
     this.facingDirection = input.direction ?? this.facingDirection;
 
     if (isSpaceFree(walls, nextX, nextY)) {
-      console.log("Moving to:", nextX, nextY);
       this.destinationPosition.set(nextX, nextY);
     }
   }
@@ -146,6 +172,34 @@ export class Hero extends GameObject {
       case DOWN:
         this.body.animations?.play("standDown");
         break;
+    }
+  }
+
+  /**
+   * Handles item pickup logic.
+   * @param data - The item data containing image and position
+   */
+  private onPickUpItem(data: { image: ImageResource; position: Vector2 }) {
+    this.destinationPosition = data.position.clone();
+    this.itemPickupTime = 500;
+
+    this.itemPickupObject = new GameObject({});
+    this.itemPickupObject.addChild(
+      new Sprite({ resource: data.image, position: new Vector2(0, -18) })
+    );
+    this.addChild(this.itemPickupObject);
+  }
+
+  /**
+   * Updates item pickup animation and timing.
+   * @param delta - Time elapsed since last frame.
+   */
+  private updateItemPickup(delta: number) {
+    this.itemPickupTime -= delta;
+    this.body.animations.play("pickUpDown");
+
+    if (this.itemPickupTime <= 0) {
+      this.itemPickupObject?.destroy();
     }
   }
 }

@@ -1,13 +1,6 @@
 import { AnimationConfig } from "../../core/AnimationConfig";
 
 const makeWalkingFrames = (rootFrame = 0) => {
-  //   return {
-  //     duration: 400,
-  //     frames: [
-  //       { time: 0, frame: rootFrame + 1 },
-
-  //     ],
-  //   };
   return new AnimationConfig({
     duration: 400,
     frames: [
@@ -40,3 +33,8 @@ export const WALK_DOWN = makeWalkingFrames(0);
 export const WALK_RIGHT = makeWalkingFrames(3);
 export const WALK_UP = makeWalkingFrames(6);
 export const WALK_LEFT = makeWalkingFrames(9);
+
+export const PICK_UP_DOWN = new AnimationConfig({
+  duration: 400,
+  frames: [{ time: 0, frame: 12 }],
+});

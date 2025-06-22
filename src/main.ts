@@ -9,6 +9,7 @@ import { Hero } from "./entities/hero/Hero";
 
 import "./styles/style.css";
 import { Camera } from "./systems/Camera";
+import { Rod } from "./entities/rod/Rod";
 
 /**
  * Initialize canvas and rendering context.
@@ -62,6 +63,9 @@ mainScene.addChild(hero);
  */
 const camera = new Camera();
 mainScene.addChild(camera);
+
+const rod = new Rod(gridCells(7), gridCells(6));
+mainScene.addChild(rod);
 
 /**
  * Attach input system to the main scene.
