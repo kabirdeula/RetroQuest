@@ -22,6 +22,8 @@ export class GameObject {
   /** Optional input system reference, if this object responds to input. */
   input?: InputSystem;
 
+  hasReadyBeenCalled: boolean = false;
+
   /**
    * Creates a new GameObject.
    * @param options.position - Initial local position (default: (0, 0)).
@@ -50,10 +52,16 @@ export class GameObject {
     // Update all children first
     this.children.forEach((child) => child.stepEntry(delta, root));
 
+    if (!this.hasReadyBeenCalled) {
+      this.hasReadyBeenCalled = true;
+      this.ready();
+    }
+
     // Then update self
     this.step(delta, root);
   }
 
+  ready() {}
   /**
    * Custom update logic for this object.
    * Override in subclasses to implement behavior.
