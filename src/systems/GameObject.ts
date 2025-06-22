@@ -1,3 +1,4 @@
+import { events } from "../core/Event";
 import { Vector2 } from "../core/Vector2";
 import type { InputSystem } from "./InputSystem";
 
@@ -15,9 +16,17 @@ export class GameObject {
   /** Child game objects, forming a hierarchy. */
   children: GameObject[];
 
+  /** Parent game object */
+  parent: GameObject | null;
+
   /** Optional input system reference, if this object responds to input. */
   input?: InputSystem;
 
+  /**
+   * Creates a new GameObject.
+   * @param options.position - Initial local position (default: (0, 0)).
+   * @param options.drawOffset - Initial draw offset (default: (0, 0)).
+   */
   constructor({
     position,
     drawOffset,
@@ -28,6 +37,7 @@ export class GameObject {
     this.position = position ?? new Vector2(0, 0);
     this.drawOffset = drawOffset ?? new Vector2(0, 0);
     this.children = [];
+    this.parent = null;
   }
 
   /**
@@ -93,6 +103,7 @@ export class GameObject {
    * @param child - The GameObject to add as a child.
    */
   addChild(child: GameObject) {
+    child.parent = this;
     this.children.push(child);
   }
 
@@ -102,6 +113,21 @@ export class GameObject {
    * @param child - The GameObject to remove.
    */
   removeChild(child: GameObject) {
+    events.unsubscribe(child);
     this.children = this.children.filter((c) => c !== child);
+    child.parent = null;
+  }
+
+  /**
+   * Recursively destroys this object and its children.
+   * Cleans up hierarchy and unsubscribes from events.
+   */
+  destroy(): void {
+    this.children.forEach((child) => {
+      child.destroy();
+    });
+    if (this.parent) {
+      this.parent.removeChild(this);
+    }
   }
 }
